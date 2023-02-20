@@ -6,7 +6,7 @@
 [![Report an issue](https://img.shields.io/badge/Support-Issues-green)](https://github.com/tquangdo/k8s-demo/issues/new)
 
 ## reference
-- [youtube1](https://www.youtube.com/watch?v=DvZVFQFjzsQ)
+- [youtube1](https://www.youtube.com/watch?v=dyaEzaDS7NQ)
 
 ## CLI
 1. ### see info
@@ -17,14 +17,6 @@
     kubectl cluster-info
     ```
 
-1. ### get all
-    ```shell
-    kubectl get all      
-    ~~~~
-    NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
-    service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   16h
-    ```
- 
 1. ### describe
     ```shell
     kubectl describe node/docker-desktop
@@ -65,5 +57,37 @@
     kubectl delete -f [file name]
     ```
 
+## youtube1
+1. ### get all
+    ```shell
+    kubectl get all      
+    ~~~~
+    # 1/ pod
+    NAME                                READY   STATUS    RESTARTS   AGE
+    pod/yt1-metadata-5f9dc4d6bc-5vbgs   1/1     Running   0          8m43s
+    pod/yt1-metadata-5f9dc4d6bc-g8xqp   1/1     Running   0          8m43s
+    pod/yt1-metadata-5f9dc4d6bc-q4hjn   1/1     Running   0          8m43s
 
-![demo](screenshots/demo.png)
+    # 2/ service
+    NAME                  TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+    service/kubernetes    ClusterIP      10.96.0.1      <none>        443/TCP          18h
+    service/yt1-service   LoadBalancer   10.104.114.3   localhost     8083:31932/TCP   29s
+
+    # 3/ deployment
+    NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+    deployment.apps/yt1-metadata   3/3     3            3           8m43s
+
+    # 4/ replicaset
+    NAME                                      DESIRED   CURRENT   READY   AGE
+    replicaset.apps/yt1-metadata-5f9dc4d6bc   3         3         3       8m43s
+    ```
+ 
+1. ### ssh to nginx container (in pod)
+    ```shell
+    kubectl exec -it yt1-metadata-5f9dc4d6bc-5vbgs -- bin/bash
+    root@yt1-metadata-5f9dc4d6bc-5vbgs:/ ls
+    #bin  boot  dev  docker-entrypoint.d  docker-entrypoint.sh  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+    ```
+1. ### demo
+    - access `localhost:8083`(in `yt1/service.yaml`) on browser will see HP of Nginx
+    ![demo](screenshots/demo.png)

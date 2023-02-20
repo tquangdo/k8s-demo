@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yt1-metadata
+  labels:
+    app: yt1-label
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: yt1-label
+  template:
+    metadata:
+      labels:
+        app: yt1-label
+    spec:
+      containers:
+        - name: cont-nginx
+          image: nginx
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
