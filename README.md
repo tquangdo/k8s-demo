@@ -7,16 +7,16 @@
 
 ## reference
 - [youtube1](https://www.youtube.com/watch?v=dyaEzaDS7NQ)
+- [youtube2](https://www.youtube.com/watch?v=CX8AnwTW2Zs)
 
 ## CLI
 1. ### see info
     ```shell
-    kubectl get all/namespace/node/pod/service/replicaset/deployment
+    kubectl get all/namespace/node/pod/svc(service)/replicaset/deployment
     kubectl config view
     kubectl version --output=yaml
     kubectl cluster-info
     ```
-
 1. ### describe
     ```shell
     kubectl describe node/docker-desktop
@@ -39,18 +39,15 @@
     memory:             3925304Ki
     pods:               110
     ```
-
 1. ### deployment
     ```shell
     kubectl create deployment [name]
     ```
-
 1. ### debug
     ```shell
     kubectl logs [pod name]
     kubectl exec -it [pod name] -- bin/bash
     ```
-
 1. ### config file
     ```shell
     kubectl apply -f [file name]
@@ -81,7 +78,6 @@
     NAME                                      DESIRED   CURRENT   READY   AGE
     replicaset.apps/yt1-metadata-5f9dc4d6bc   3         3         3       8m43s
     ```
- 
 1. ### ssh to nginx container (in pod)
     ```shell
     kubectl exec -it yt1-metadata-5f9dc4d6bc-5vbgs -- bin/bash
@@ -91,3 +87,22 @@
 1. ### demo
     - access `localhost:8083`(in `yt1/service.yaml`) on browser will see HP of Nginx
     ![demo](screenshots/demo.png)
+
+## youtube2
+- run `kubectl apply -f yt2/deployment.yaml`
+1. ### ERR
+    - show `red icon` & search KW `False` will have errors
+    ![ERR](screenshots/ERR.png)
+1. ### OK > port forward
+    - with extension, type `10001:80` will auto create this command:
+    ```shell
+    kubectl port-forward pods/hello-deployment-f694ff6c4-cm2qz 10001:80 -n default
+    # Forwarding from 127.0.0.1:10001 -> 80
+    # Forwarding from [::1]:10001 -> 80
+    # Handling connection for 10001
+    ```
+    ![PortFWD](screenshots/PortFWD.png)
+1. ### demo
+    - access `localhost:10001` on browser will see `gcr.io/google-samples/hello-app:2.0`
+    ![Demo2](screenshots/Demo2.png)
+    
