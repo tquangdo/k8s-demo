@@ -8,11 +8,12 @@
 ## reference
 - [youtube1](https://www.youtube.com/watch?v=dyaEzaDS7NQ)
 - [youtube2](https://www.youtube.com/watch?v=CX8AnwTW2Zs)
+- [youtube3](https://www.youtube.com/watch?v=hl6qFk6WhUk)
 
 ## CLI
 1. ### see info
     ```shell
-    kubectl get all/namespace/node/pod/svc(service)/replicaset/deployment
+    kubectl get all/namespace/node/pod/svc(service)/replicaset/deployment< --all-namespaces>
     kubectl config view
     kubectl version --output=yaml
     kubectl cluster-info
@@ -52,6 +53,7 @@
     ```shell
     kubectl apply -f [file name]
     kubectl delete -f [file name]
+    kubectl delete --all pods/deployments --namespace=default
     ```
 
 ## youtube1
@@ -91,7 +93,7 @@
 ## youtube2
 - run `kubectl apply -f yt2/deployment.yaml`
 1. ### ERR
-    - show `red icon` & search KW `False` will have errors
+    - show 🔴 & search KW `False` will see errors
     ![ERR](screenshots/ERR.png)
 1. ### OK > port forward
     - with extension, type `10001:80` will auto create this command:
@@ -105,4 +107,31 @@
 1. ### demo
     - access `localhost:10001` on browser will see `gcr.io/google-samples/hello-app:2.0`
     ![Demo2](screenshots/Demo2.png)
-    
+
+## youtube3
+1. ### create deployment
+    ```shell
+    kubectl create deployment demo-nginx --image=nginx --replicas=1
+    kubectl get deployment 
+    # NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+    # demo-nginx   1/1     1            1           2m24s
+    kubectl get svc        
+    # NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+    # kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   36h
+    ```
+1. ### expose deployment
+    ```shell
+    kubectl expose deployment demo-nginx --port=80
+    kubectl get svc                               
+    # NAME         TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
+    # demo-nginx   ClusterIP   10.98.20.54   <none>        80/TCP    8s
+    # kubernetes   ClusterIP   10.96.0.1     <none>        443/TCP   36h
+    ```
+1. ### port forward
+    ```shell
+    kubectl port-forward service/demo-nginx 17000:80
+    # Forwarding from 127.0.0.1:17000 -> 80
+    # Forwarding from [::1]:17000 -> 80
+    # Handling connection for 17000
+    ```
+    - access `localhost:17000` on browser will see HP of Nginx
