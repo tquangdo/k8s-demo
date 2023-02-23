@@ -55,7 +55,7 @@
     ```shell
     kubectl apply -f [file name]
     kubectl delete -f [file name]
-    kubectl delete --all svc/pod/deployment --namespace=default
+    kubectl delete --all svc/pod/replicaset/deployment/secret --namespace=default
     ```
 
 ## youtube1
