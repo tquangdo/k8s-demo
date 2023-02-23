@@ -9,11 +9,13 @@
 - [youtube1](https://www.youtube.com/watch?v=dyaEzaDS7NQ)
 - [youtube2](https://www.youtube.com/watch?v=CX8AnwTW2Zs)
 - [youtube3](https://www.youtube.com/watch?v=hl6qFk6WhUk)
+- [youtube4](https://www.youtube.com/watch?v=s_o8dwzRlu4)
 
 ## CLI
 1. ### see info
     ```shell
-    kubectl get all/namespace/node/pod/svc(service)/replicaset/deployment< --all-namespaces>
+    kubectl get all/namespace/node/svc/pod/replicaset/deployment/secret< --all-namespaces>< -o wide>
+    kubectl get configmap
     kubectl config view
     kubectl version --output=yaml
     kubectl cluster-info
@@ -53,7 +55,7 @@
     ```shell
     kubectl apply -f [file name]
     kubectl delete -f [file name]
-    kubectl delete --all pods/deployments --namespace=default
+    kubectl delete --all svc/pod/deployment --namespace=default
     ```
 
 ## youtube1
@@ -135,3 +137,50 @@
     # Handling connection for 17000
     ```
     - access `localhost:17000` on browser will see HP of Nginx
+
+## youtube4
+![yt4_1](screenshots/yt4_1.png)
+-
+![yt4_2](screenshots/yt4_2.png)
+
+1. ### run 4 yaml files
+    ```shell
+    kubectl apply -f yt4/mongo-config.yaml
+    kubectl apply -f yt4/mongo-secret.yaml
+    kubectl apply -f yt4/mongo.yaml
+    kubectl apply -f yt4/webapp.yaml
+    ```
+1. ### check result
+    1. ### secret
+        ```shell
+        kubectl get secret
+        #NAME           TYPE     DATA   AGE
+        #mongo-secret   Opaque   2      3m37s
+        ```
+    1. ### configmap
+        ```shell
+        kubectl get configmap
+        #NAME               DATA   AGE
+        #mongo-config       1      4m
+        ```
+    1. ### service
+        ```shell
+        kubectl get svc                                   
+        #NAME             TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+        #kubernetes       ClusterIP   10.96.0.1      <none>        443/TCP          39m
+        #mongo-service    ClusterIP   10.111.82.5    <none>        27017/TCP        4m57s
+        #webapp-service   NodePort    10.101.60.17   <none>        3000:30100/TCP   4m48s
+        ```
+    1. ### pod
+        ```shell
+        kubectl get pod      
+        #NAME                                 READY   STATUS    RESTARTS   AGE
+        #mongo-deployment-7d4d5c9f6c-9mzhh    1/1     Running   0          3m47s
+        #webapp-deployment-649d7fb885-xw6mq   1/1     Running   0          3m38s
+        kubectl logs webapp-deployment-649d7fb885-xw6mq -f
+        #app listening on port 3000!
+        ```
+1. ### access on browser
+![yt4_3](screenshots/yt4_3.png)
+-
+![yt4_4](screenshots/yt4_4.png)
