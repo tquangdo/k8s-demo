@@ -10,13 +10,18 @@
 - [youtube2](https://www.youtube.com/watch?v=CX8AnwTW2Zs)
 - [youtube3](https://www.youtube.com/watch?v=hl6qFk6WhUk)
 - [youtube4](https://www.youtube.com/watch?v=s_o8dwzRlu4)
+- [xuanthulab](https://xuanthulab.net/gioi-thieu-va-cai-dat-kubernetes-cluster.html)
 
 ## CLI
 1. ### see info
     ```shell
-    kubectl get all/namespace/node/svc/pod/replicaset/deployment/secret< --all-namespaces>< -o wide>
+    kubectl get all/namespace/node/svc/pod/replicaset/deployment/secret< (-A)--all-namespaces>< -o wide>
     kubectl get configmap
     kubectl config view
+    kubectl config get-contexts
+    #CURRENT   NAME             CLUSTER          AUTHINFO         NAMESPACE
+    #*         docker-desktop   docker-desktop   docker-desktop
+    # => kubectl config use-context docker-desktop
     kubectl version --output=yaml
     kubectl cluster-info
     ```
@@ -184,3 +189,44 @@
 ![yt4_3](screenshots/yt4_3.png)
 -
 ![yt4_4](screenshots/yt4_4.png)
+
+## xuanthulab
+![xtl](screenshots/xtl.png)
+
+1. ### install in 1 master & 2 workers
+    - file `install-docker-kube.sh`
+    ```shell
+    ...
+    yum install -y -q kubeadm kubelet kubectl
+    systemctl enable kubelet
+    systemctl start kubelet
+    ...
+    # Configure NetworkManager before attempting to use Calico networking.
+    cat >>/etc/NetworkManager/conf.d/calico.conf<<EOF
+    ```
+    - in `master` vagrant file
+    ```shell
+    # Chạy file install-docker-kube.sh sau khi nạp Box
+    config.vm.provision "shell", path: "./../install-docker-kube.sh"
+    ```
+    - in `worker` vagrant file
+    ```shell
+    config.vm.provision "shell", path: "./../install-docker-kube.sh"
+    config.vm.provision "shell", inline: <<-SHELL
+    ```
+1. ### Khởi tạo Cluster
+    - Trong lệnh khởi tạo cluster có tham số --pod-network-cidr để chọn cấu hình mạng của POD, do dự định dùng Addon calico nên chọn --pod-network-cidr=192.168.0.0/16
+    - Gõ lệnh sau để khở tạo là nút master của Cluster
+    ```shell
+    kubeadm init --apiserver-advertise-address=172.16.10.100 --pod-network-cidr=192.168.0.0/16
+    ```
+    - Tiếp đó, nó yêu cầu cài đặt một Plugin mạng trong các Plugin tại addon, ở đây đã chọn calico, nên chạy lệnh sau để cài nó
+    ```shell
+    kubectl apply -f https://docs.projectcalico.org/v3.10/manifests/calico.yaml
+    ```
+1. ### check calico
+    - `kubectl get pods -A`
+    ![calico](screenshots/calico.png)
+1. ### Kết nối Node vào Cluster
+    - `kubeadm token create --print-join-command`
+    ![join](screenshots/join.png)
