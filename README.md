@@ -194,7 +194,7 @@
 ![xtl](screenshots/xtl.png)
 
 1. ### install in 1 master & 2 workers
-    - file `install-docker-kube.sh`
+    - define file `install-docker-kube.sh`
     ```shell
     ...
     yum install -y -q kubeadm kubelet kubectl
@@ -204,12 +204,12 @@
     # Configure NetworkManager before attempting to use Calico networking.
     cat >>/etc/NetworkManager/conf.d/calico.conf<<EOF
     ```
-    - in `master` vagrant file
+    - call sh in `master` vagrant file
     ```shell
     # Chạy file install-docker-kube.sh sau khi nạp Box
     config.vm.provision "shell", path: "./../install-docker-kube.sh"
     ```
-    - in `worker` vagrant file
+    - call sh in `worker` vagrant file
     ```shell
     config.vm.provision "shell", path: "./../install-docker-kube.sh"
     config.vm.provision "shell", inline: <<-SHELL
