@@ -311,9 +311,9 @@
         #|-----------|---------------------------|-------------|------------------------|
         ```
         - result is the same with case run `http://localhost:31515` by docker desktop
-        ![yt5_1](screenshots/yt5_1.png)
+        ![yt5_kq1](screenshots/yt5_kq1.png)
         - access `http://192.168.49.2:31515` on browser -> can NOT show JSON response!!! In case run `http://localhost:31516/api/data` by docker desktop, not minikube is OK
-        ![yt5_2](screenshots/yt5_2.png)
+        ![yt5_kq2](screenshots/yt5_kq2.png)
     1. #### opt2
         - run this cmd & access `http://127.0.0.1:52242` on browser
         ```shell
