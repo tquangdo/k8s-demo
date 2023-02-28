@@ -11,6 +11,7 @@
 - [youtube3](https://www.youtube.com/watch?v=hl6qFk6WhUk)
 - [youtube4](https://www.youtube.com/watch?v=s_o8dwzRlu4)
 - [xuanthulab](https://xuanthulab.net/gioi-thieu-va-cai-dat-kubernetes-cluster.html)
+- [youtube5](https://www.youtube.com/watch?v=TMD_PhlLuPw)
 
 ## CLI
 1. ### see info
@@ -61,6 +62,7 @@
     kubectl apply -f [file name]
     kubectl delete -f [file name]
     kubectl delete --all svc/pod/replicaset/deployment/secret --namespace=default
+    kubectl delete all --all -n {namespace}
     ```
 
 ## youtube1
@@ -230,3 +232,107 @@
 1. ### Kết nối Node vào Cluster
     - `kubeadm token create --print-join-command`
     ![join](screenshots/join.png)
+
+## youtube5
+![yt5_all](screenshots/yt5_all.png)
+
+1. ### Build Docker Images
+    ```shell
+    yt5$ docker build -t amilinko/client-example:v10 -f ./client/Dockerfile ./client
+    yt5$ docker build -t amilinko/server-example:v10 -f ./server/Dockerfile ./server
+    ```
+1. ### minikube
+    1. #### install
+        - `brew install minikube`
+    1. #### cmd
+        - start
+        ```shell
+        minikube version  
+        #minikube version: v1.29.0
+        minikube start<delete>
+        #Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+        ```
+        - check
+        ```shell
+        kubectl get node -o wide
+        #NAME       STATUS   ROLES           AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
+        #minikube   Ready    control-plane   11h   v1.26.1   192.168.49.2   <none>        Ubuntu 20.04.5 LTS   5.15.49-linuxkit   docker://20.10.23
+        minikube profile list
+        #|----------|-----------|---------|--------------|------|---------|---------|-------|--------|
+        #| Profile  | VM Driver | Runtime |      IP      | Port | Version | Status  | Nodes | Active |
+        #|----------|-----------|---------|--------------|------|---------|---------|-------|--------|
+        #| minikube | docker    | docker  | 192.168.49.2 | 8443 | v1.26.1 | Running |     1 | *      |
+        #|----------|-----------|---------|--------------|------|---------|---------|-------|--------|
+        minikube status
+        #type: Control Plane
+        #host: Running
+        #kubelet: Running
+        #apiserver: Running
+        #kubeconfig: Configured
+        minikube ip
+        #192.168.49.2
+        ```
+1. ### kubectl run
+    ```shell
+    kubectl apply -f yt5/k8s
+    kubectl get all
+    #NAME                                     READY   STATUS    RESTARTS   AGE
+    #pod/client-deployment-695f658c48-bm5dl   1/1     Running   0          7m47s
+    #pod/server-deployment-6fcdfddfd9-ddjwp   1/1     Running   0          7m47s
+
+    #NAME                                TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+    #service/client-cluster-ip-service   NodePort    10.101.88.254   <none>        3000:31515/TCP   7m47s
+    #service/kubernetes                  ClusterIP   10.96.0.1       <none>        443/TCP          27m
+    #service/server-cluster-ip-service   NodePort    10.100.8.142    <none>        5000:31516/TCP   7m47s
+
+    #NAME                                READY   UP-TO-DATE   AVAILABLE   AGE
+    #deployment.apps/client-deployment   1/1     1            1           7m47s
+    #deployment.apps/server-deployment   1/1     1            1           7m47s
+
+    #NAME                                           DESIRED   CURRENT   READY   AGE
+    #replicaset.apps/client-deployment-695f658c48   1         1         1       7m47s
+    #replicaset.apps/server-deployment-6fcdfddfd9   1         1         1       7m47s
+    ```
+1. ### check minikube result
+    1. #### opt1
+        - run this cmd will auto access `http://127.0.0.1:51075` on browser
+        ```shell
+        minikube service client-cluster-ip-service
+        #|-----------|---------------------------|-------------|---------------------------|
+        #| NAMESPACE |           NAME            | TARGET PORT |            URL            |
+        #|-----------|---------------------------|-------------|---------------------------|
+        #| default   | client-cluster-ip-service |        3000 | http://192.168.49.2:31515 |
+        #|-----------|---------------------------|-------------|---------------------------|
+        #🏃  Starting tunnel for service client-cluster-ip-service.
+        #|-----------|---------------------------|-------------|------------------------|
+        #| NAMESPACE |           NAME            | TARGET PORT |          URL           |
+        #|-----------|---------------------------|-------------|------------------------|
+        #| default   | client-cluster-ip-service |             | http://127.0.0.1:51075 |
+        #|-----------|---------------------------|-------------|------------------------|
+        ```
+        - result is the same with case run `http://localhost:31515` by docker desktop
+        ![yt5_1](screenshots/yt5_1.png)
+        - access `http://192.168.49.2:31515` on browser -> can NOT show JSON response!!! In case run `http://localhost:31516/api/data` by docker desktop, not minikube is OK
+        ![yt5_2](screenshots/yt5_2.png)
+    1. #### opt2
+        - run this cmd & access `http://127.0.0.1:52242` on browser
+        ```shell
+        minikube service client-cluster-ip-service --url
+        #http://127.0.0.1:52242
+        #❗  Because you are using a Docker driver on darwin, the terminal needs to be open to run it.
+        ```
+    1. #### opt3
+        ```shell
+        kubectl port-forward svc/client-cluster-ip-service 3000:3000
+        kubectl port-forward pod/client-deployment-xxx 3000:3000
+        ```
+    1. #### check log pod
+        ```shell
+        kubectl logs pod/server-deployment-xxx -f
+        #Listening on Port 5000
+        ```
+    1. #### minikube dashboard
+        ```shell
+        minikube dashboard
+        #🔌  Enabling dashboard ...
+        ```
