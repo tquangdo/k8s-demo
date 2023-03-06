@@ -28,7 +28,7 @@
     ```
 1. ### describe
     ```shell
-    kubectl describe node/docker-desktop
+    kubectl describe <svc/pod> node/docker-desktop
     ~~~~
     Name:               docker-desktop
     Roles:              control-plane
@@ -118,32 +118,49 @@
     ![Demo2](screenshots/Demo2.png)
 
 ## youtube3
-1. ### create deployment
-    ```shell
-    kubectl create deployment demo-nginx --image=nginx --replicas=1
-    kubectl get deployment 
-    # NAME         READY   UP-TO-DATE   AVAILABLE   AGE
-    # demo-nginx   1/1     1            1           2m24s
-    kubectl get svc        
-    # NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
-    # kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   36h
-    ```
-1. ### expose deployment
-    ```shell
-    kubectl expose deployment demo-nginx --port=80
-    kubectl get svc                               
-    # NAME         TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
-    # demo-nginx   ClusterIP   10.98.20.54   <none>        80/TCP    8s
-    # kubernetes   ClusterIP   10.96.0.1     <none>        443/TCP   36h
-    ```
-1. ### port forward
-    ```shell
-    kubectl port-forward service/demo-nginx 17000:80
-    # Forwarding from 127.0.0.1:17000 -> 80
-    # Forwarding from [::1]:17000 -> 80
-    # Handling connection for 17000
-    ```
-    - access `localhost:17000` on browser will see HP of Nginx
+1. ### (yt3-1) create deployment
+    1. #### create
+        ```shell
+        kubectl create deployment demo-nginx --image=nginx --replicas=1
+        kubectl get deployment 
+        # NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+        # demo-nginx   1/1     1            1           2m24s
+        kubectl get svc        
+        # NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+        # kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   36h
+        ```
+    1. #### expose deployment
+        ```shell
+        kubectl expose deployment demo-nginx --port=80
+        kubectl get svc
+        # NAME         TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
+        # demo-nginx   ClusterIP   10.98.20.54   <none>        80/TCP    8s
+        # kubernetes   ClusterIP   10.96.0.1     <none>        443/TCP   36h
+        ```
+    1. #### port forward
+        ```shell
+        kubectl port-forward service/demo-nginx 17000:80
+        # Forwarding from 127.0.0.1:17000 -> 80
+        # Forwarding from [::1]:17000 -> 80
+        # Handling connection for 17000
+        ```
+        - access `localhost:17000` on browser will see HP of Nginx
+1. ### (yt3-2) run
+    1. #### run
+        ```shell
+        kubectl run test-nginx --image=nginx --port=80
+        kubectl get pod -> `get deployment`: No resources found!!!    
+        #NAME         READY   STATUS    RESTARTS   AGE
+        #test-nginx   1/1     Running   0          43m
+        ```
+    1. #### port forward
+        ```shell
+        kubectl port-forward pod/test-nginx 17000:80
+        #Forwarding from 127.0.0.1:17000 -> 80
+        #Forwarding from [::1]:17000 -> 80
+        #Handling connection for 17000
+        ```
+        - access `localhost:17000` on browser will see HP of Nginx
 
 ## youtube4
 ![yt4_1](screenshots/yt4_1.png)
@@ -222,13 +239,15 @@
     ```shell
     kubeadm init --apiserver-advertise-address=172.16.10.100 --pod-network-cidr=192.168.0.0/16
     ```
-    - Tiếp đó, nó yêu cầu cài đặt một Plugin mạng trong các Plugin tại addon, ở đây đã chọn calico, nên chạy lệnh sau để cài nó
-    ```shell
-    kubectl apply -f https://docs.projectcalico.org/v3.10/manifests/calico.yaml
-    ```
-1. ### check calico
-    - `kubectl get pods -A`
-    ![calico](screenshots/calico.png)
+1. ### calico
+    1. #### create
+        - Tiếp đó, nó yêu cầu cài đặt một Plugin mạng trong các Plugin tại addon, ở đây đã chọn calico, nên chạy lệnh sau để cài nó
+        ```shell
+        kubectl apply -f https://docs.projectcalico.org/v3.10/manifests/calico.yaml
+        ```
+    1. #### check
+        - `kubectl get pods -A`
+        ![calico](screenshots/calico.png)
 1. ### Kết nối Node vào Cluster
     - `kubeadm token create --print-join-command`
     ![join](screenshots/join.png)
@@ -272,7 +291,7 @@
         minikube ip
         #192.168.49.2
         ```
-1. ### kubectl run
+1. ### run youtube5
     ```shell
     kubectl apply -f yt5/k8s
     kubectl get all
@@ -336,3 +355,53 @@
         minikube dashboard
         #🔌  Enabling dashboard ...
         ```
+
+## dashboard & token
+
+1. ### dashboard
+    ```shell
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml
+    #secret/kubernetes-dashboard-certs created
+    #serviceaccount/kubernetes-dashboard created
+    kubectl -n kube-system get secret
+    #NAME                              TYPE     DATA   AGE
+    #kubernetes-dashboard-certs        Opaque   0      20m
+    #kubernetes-dashboard-key-holder   Opaque   2      19m
+    ```
+1. ### proxy
+    ```shell
+    kubectl proxy
+    ```
+    - access on browser: `localhost:8001` or `http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/`
+    ![proxy](screenshots/proxy.png)
+1. ### config
+    ```shell
+    kubectl -n kube-system edit service kubernetes-dashboard
+    ```
+    - change from `type: ClusterIP` to `type: NodePort`
+    ```shell
+    kubectl -n kube-system get service kubernetes-dashboard
+    #NAME                   TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)         #AGE
+    #kubernetes-dashboard   NodePort   10.100.31.29   <none>        443:30728/TCP   #3h5m
+    ```
+1. ### token
+    - get token
+    ```shell
+    kubectl -n kube-system describe secret kubernetes-dashboard-key-holder
+    #Name:         kubernetes-dashboard-key-holder
+    #Type:  Opaque
+    #Data
+    #====
+    #priv:  1675 bytes
+    #pub:   459 bytes
+
+    kubectl -n kube-system get secret kubernetes-dashboard-key-holder -oyaml             
+    #apiVersion: v1
+    #data:
+    #  priv: xxx
+    #  pub: yyy
+    #kind: Secret
+    #...
+    ```
+    - copy token in `get secret` result (now has NO token) and paste into token item of browser `https://localhost:30728`
+    ![token](screenshots/token.png)
