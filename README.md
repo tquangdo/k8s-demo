@@ -24,7 +24,8 @@
     #*         docker-desktop   docker-desktop   docker-desktop
     # => kubectl config use-context docker-desktop
     kubectl version --output=yaml
-    kubectl cluster-info
+    kubectl cluster-info dump | grep cluster-name
+    #"--cluster-name=mk",
     ```
 1. ### describe
     ```shell
